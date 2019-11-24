@@ -1,0 +1,17 @@
+[package]
+name = "issuetracker"
+version = "0.1.0"
+authors = ["Gian Clemons <gian.d.clemons@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+diesel = {version = "1.4.3", features = ["sqlite"] }
+rocket = "0.4.2"
+serde = { version = "1.0", features = ["derive"]}
+
+[dependencies.rocket_contrib]
+version = '0.4.2'
+default-features = false
+features = ["json"]
