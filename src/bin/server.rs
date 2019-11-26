@@ -1,6 +1,6 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-#[macro_use]
+// #[macro_use]
 extern crate serde;
 
 #[macro_use]
@@ -8,10 +8,14 @@ extern crate rocket;
 
 extern crate rocket_contrib;
 
-use issuetracker::db::{establish_connection, models, query_projects, query_issues};
+use issuetracker::db::{establish_connection, /* models, */ query_projects, query_issues};
 use rocket_contrib::json::Json;
+use issuetracker::json::{
+    JsonIssueResponse,
+    JsonProjectResponse,
+};
 
-#[derive(Serialize)]
+/* #[derive(Serialize)]
 struct JsonProjectResponse {
     data: Vec<models::Project>,
 } 
@@ -19,7 +23,7 @@ struct JsonProjectResponse {
 #[derive(Serialize)]
 struct JsonIssueResponse {
     data: Vec<models::Issue>,
-}
+} */
 
 #[get("/")]
 fn index() -> String {
