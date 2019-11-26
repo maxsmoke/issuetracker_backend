@@ -1,10 +1,10 @@
 use diesel;
 use diesel::{prelude::*, sqlite::SqliteConnection};
 
-use crate::db::schema::issue::dsl::{
+/* use crate::db::schema::issue::dsl::{
     complete as complete_issues, 
-    // issues as all_issues
-};
+    issues as all_issues
+}; */
 
 pub mod models;
 pub mod schema;
@@ -31,5 +31,21 @@ pub fn query_issues(conn: &SqliteConnection) -> Vec<models::Issue> {
     schema::issue::table
         .load::<models::Issue>(conn)
         .expect("Error loading Issues")
+}
+
+pub fn create_project<'a>(conn: &SqliteConnection, title: &'a str){
+    let project = models::NewProject {
+        title: title,
+        complete: 0,
+    };
+    diesel::insert_into(schema::project::table)
+        .values(&project)
+        .execute(conn)
+        .expect("Error creating new project");
+}
+pub fn query_projects(conn: &SqliteConnection) -> Vec<models::Project>{
+    schema::project::table
+        .load::<models::Project>(conn)
+        .expect("Error loading Projects")
 }
 
