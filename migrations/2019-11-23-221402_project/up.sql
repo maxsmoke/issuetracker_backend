@@ -12,5 +12,7 @@ CREATE TABLE issue (
     project_id INTEGER NOT NULL,
     complete INTEGER NOT NULL,
     content TEXT NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (project_id)
+        REFERENCES project (id)
 );

@@ -8,22 +8,12 @@ extern crate rocket;
 
 extern crate rocket_contrib;
 
-use issuetracker::db::{establish_connection, /* models, */ query_projects, query_issues};
+use issuetracker::db::{establish_connection, query_projects, query_issues};
 use rocket_contrib::json::Json;
 use issuetracker::json::{
     JsonIssueResponse,
     JsonProjectResponse,
 };
-
-/* #[derive(Serialize)]
-struct JsonProjectResponse {
-    data: Vec<models::Project>,
-} 
-
-#[derive(Serialize)]
-struct JsonIssueResponse {
-    data: Vec<models::Issue>,
-} */
 
 #[get("/")]
 fn index() -> String {
@@ -53,7 +43,7 @@ fn get_issues() -> Json<JsonIssueResponse>{
 }
 
 fn main() {
-    rocket::ignite().mount("/", routes![index, get_issues,get_projects]).launch();
+    rocket::ignite().mount("/", routes![index, get_issues, get_projects]).launch();
 }
 
 
