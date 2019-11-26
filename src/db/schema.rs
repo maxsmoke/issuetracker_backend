@@ -13,8 +13,11 @@ table! {
         id -> Integer,
         title -> Text,
         complete -> Integer,
+        issue_count -> Integer,
     }
 }
+
+joinable!(issue -> project (project_id));
 
 allow_tables_to_appear_in_same_query!(
     issue,

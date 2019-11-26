@@ -3,6 +3,7 @@ CREATE TABLE project (
     id INTEGER NOT NULL,
     title TEXT NOT NULL,
     complete INTEGER NOT NULL,
+    issue_count INTEGER NOT NULL,
     PRIMARY KEY(id)
 );
 

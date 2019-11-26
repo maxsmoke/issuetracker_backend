@@ -30,5 +30,6 @@ pub struct NewProject<'a> {
 pub struct Project {
     pub id: i32,
     pub title: String,
-    pub complete: i32
+    pub complete: i32,
+    pub issue_count: i32,
 }
