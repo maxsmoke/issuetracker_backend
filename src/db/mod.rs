@@ -2,10 +2,9 @@ use diesel;
 use diesel::{prelude::*, sqlite::SqliteConnection};
 
 use crate::db::schema::issue::dsl::{
-    // complete as complete_issues, 
     issue as all_issues,
     complete as new_complete_issue,
-    // project_id,
+    project_id,
 }; 
 
 use crate::db::schema::project::dsl::{
@@ -49,7 +48,6 @@ pub fn close_item(conn: &SqliteConnection, id: &i32, type_change: i8) -> QueryRe
         let update_issue = diesel::update(all_issues.find(id));
         update_issue.set(new_complete_issue.eq(new_status)).execute(conn)
         
-        // println!("Issue status changed to: {}", new_status);
     } else { // projects
 
         proj_target = all_projects.find(id).get_result::<models::Project>(conn).unwrap();
@@ -61,7 +59,6 @@ pub fn close_item(conn: &SqliteConnection, id: &i32, type_change: i8) -> QueryRe
 
         let update_proj = diesel::update(all_projects.find(id));
         update_proj.set(new_complete_proj.eq(new_status)).execute(conn)
-        // println!("Project status changed to: {}", new_status);
     }
 
 }
@@ -113,14 +110,14 @@ pub fn query_projects(conn: &SqliteConnection) -> Vec<models::Project>{
 //used to update how many projects
 //TODO NOT QUERYING CORRECTLY finding all issues with same id. Which would always return one.
 fn count_issues_in_projects(conn: &SqliteConnection, id: i32) -> i32 {
-    let result = all_issues.find(id)
+    let result = all_issues.filter(project_id.eq(id))
         .count()
         .get_result::<i64>(conn)
         .unwrap() as i32;
 
-    println!("issue count {}", result);
-    result
+    // println!("issue count {}", result);
 
+    result
 }
 /* fn update_project(conn: &SqliteConnection){
 
