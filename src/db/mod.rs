@@ -108,16 +108,11 @@ pub fn query_projects(conn: &SqliteConnection) -> Vec<models::Project>{
 }
 
 //used to update how many projects
-//TODO NOT QUERYING CORRECTLY finding all issues with same id. Which would always return one.
 fn count_issues_in_projects(conn: &SqliteConnection, id: i32) -> i32 {
-    let result = all_issues.filter(project_id.eq(id))
+    /* let result =  */all_issues.filter(project_id.eq(id))
         .count()
         .get_result::<i64>(conn)
-        .unwrap() as i32;
-
-    // println!("issue count {}", result);
-
-    result
+        .unwrap() as i32
 }
 /* fn update_project(conn: &SqliteConnection){
 
