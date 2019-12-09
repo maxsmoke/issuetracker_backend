@@ -24,11 +24,13 @@ pub struct Issue {
 pub struct NewProject<'a> {
     pub title: &'a str,
     pub complete: i32,
+    pub issue_count: i32,
 }
 
 #[derive(Queryable, Serialize)]
 pub struct Project {
     pub id: i32,
     pub title: String,
-    pub complete: i32
+    pub complete: i32,
+    pub issue_count: i32,
 }

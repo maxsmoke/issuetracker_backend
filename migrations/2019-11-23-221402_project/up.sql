@@ -3,6 +3,7 @@ CREATE TABLE project (
     id INTEGER NOT NULL,
     title TEXT NOT NULL,
     complete INTEGER NOT NULL,
+    issue_count INTEGER NOT NULL,
     PRIMARY KEY(id)
 );
 
@@ -12,5 +13,7 @@ CREATE TABLE issue (
     project_id INTEGER NOT NULL,
     complete INTEGER NOT NULL,
     content TEXT NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (project_id)
+        REFERENCES project (id)
 );

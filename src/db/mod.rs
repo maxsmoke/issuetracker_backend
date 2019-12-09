@@ -1,10 +1,17 @@
 use diesel;
 use diesel::{prelude::*, sqlite::SqliteConnection};
 
-/* use crate::db::schema::issue::dsl::{
-    complete as complete_issues, 
-    issues as all_issues
-}; */
+use crate::db::schema::issue::dsl::{
+    issue as all_issues,
+    complete as new_complete_issue,
+    project_id,
+}; 
+
+use crate::db::schema::project::dsl::{
+    project as all_projects,
+    complete as new_complete_proj,
+    issue_count,
+};
 
 pub mod models;
 pub mod schema;
@@ -26,7 +33,36 @@ pub fn create_issue<'a>(conn: &SqliteConnection, title: &'a str, proj: i32) {
         .execute(conn)
         .expect("Error inserting new issue");
 }
+pub fn close_item(conn: &SqliteConnection, id: &i32, type_change: i8) -> QueryResult<usize> {
+    let issue_target;
+    let proj_target;
+    
+    if type_change == 1 { // issues
 
+        issue_target = all_issues.find(id).get_result::<models::Issue>(conn).unwrap();
+        let new_status = match issue_target.complete {
+            1 => 0,
+            0 => 1,
+            _ => 0,
+        };
+
+        let update_issue = diesel::update(all_issues.find(id));
+        update_issue.set(new_complete_issue.eq(new_status)).execute(conn)
+        
+    } else { // projects
+
+        proj_target = all_projects.find(id).get_result::<models::Project>(conn).unwrap();
+        let new_status = match proj_target.complete {
+            1 => 0,
+            0 => 1,
+            _ => 0,
+        };
+
+        let update_proj = diesel::update(all_projects.find(id));
+        update_proj.set(new_complete_proj.eq(new_status)).execute(conn)
+    }
+
+}
 pub fn query_issues(conn: &SqliteConnection) -> Vec<models::Issue> {
     schema::issue::table
         .load::<models::Issue>(conn)
@@ -37,6 +73,7 @@ pub fn create_project<'a>(conn: &SqliteConnection, title: &'a str){
     let project = models::NewProject {
         title: title,
         complete: 0,
+        issue_count: 0,
     };
     diesel::insert_into(schema::project::table)
         .values(&project)
@@ -44,8 +81,37 @@ pub fn create_project<'a>(conn: &SqliteConnection, title: &'a str){
         .expect("Error creating new project");
 }
 pub fn query_projects(conn: &SqliteConnection) -> Vec<models::Project>{
+    let projects = schema::project::table
+    .load::<models::Project>(conn)
+    .expect("Error loading Projects");
+
+    //update issue count
+    for project in projects{
+
+        let new_count = all_issues.filter(project_id.eq(project.id))
+        .count()
+        .get_result::<i64>(conn)
+        .unwrap() as i32;
+
+        if project.issue_count != new_count{
+            let update_project = diesel::update(all_projects.find(project.id));
+        
+            let result = update_project.set(issue_count.eq(new_count)).execute(conn);
+
+            match result{
+                Ok(e) => println!("{}", e),
+                Err(_e) => panic!("update issue_count Failed"),
+            };
+        }
+        
+    };
+
     schema::project::table
-        .load::<models::Project>(conn)
-        .expect("Error loading Projects")
+    .load::<models::Project>(conn)
+    .expect("Error loading Projects")
 }
 
+
+/* fn update_project(conn: &SqliteConnection){
+
+} */

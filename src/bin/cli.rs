@@ -4,6 +4,7 @@ use issuetracker::db::{
     create_project,
     query_projects,
     establish_connection,
+    close_item
 };
 use std::env;
 
@@ -13,8 +14,9 @@ fn help() {
     println!("      new_proj <title>: create new Proj.");
     println!("      show_issues: show all issues.");
     println!("      show_proj: show all projects.");
+    println!("      issue_status <id>: update issue status.");
+    println!("      proj_status <id>: update proj status.");
     // println!("      delete <id>: delete task.");
-    // println!("      mark_done <id>: update task done status.");
 }
 
 fn new_issue(args: &[String]) {
@@ -50,13 +52,14 @@ fn show_issues(args: &[String]) {
     if args.len() > 0 {
         println!("show_issues: unexpected argument.");
         help();
-        return;
+        return
     }
     let conn = establish_connection();
     println!("Issues\n---");
 
     for issue in query_issues(&conn) {
-        println!("Title: {} | Content: {} | Complete: {} | Project_ID: {}", 
+        println!("Issue ID: {} | Title: {} | Content: {} | Complete: {} | Project_ID: {}", 
+        issue.id,
         issue.title, 
         issue.content, 
         issue.complete,
@@ -64,21 +67,52 @@ fn show_issues(args: &[String]) {
     )
     }
 }
+fn issue_done(args: &[String]) {
+    if args.len() > 1 {
+        println!("issue_status: too many args");
+        help();
+        return
+    }
+    let conn = establish_connection();
+    let conversion = &args[0].to_string();
+
+    let _err = match conversion.parse::<i32>() {
+        Ok(n) => close_item(&conn, &n, 1),
+        Err(e) => panic!("id: not a number {}", e),
+    };
+    // close_item(conn, &args[1], 1);  
+}
+fn proj_done(args: &[String]) {
+    if args.len() > 1 {
+        println!("issue_status: too many args");
+        help();
+        return
+    }
+    let conn = establish_connection();
+    let conversion = &args[0].to_string();
+
+    let _err = match conversion.parse::<i32>() {
+        Ok(n) => close_item(&conn, &n, 0),
+        Err(e) => panic!("id: not a number {}", e),
+    };
+    // close_item(conn, &args[1], 1);  
+}
 
 //TODO: Add number of open issues in project
 fn show_projects(args: &[String]){
     if args.len() > 0 {
         println!("show_proj: unexpected argument.");
         help();
-        return;
+        return
     }
     let conn = establish_connection();
     println!("Projects\n---");
 
     for proj in query_projects(&conn){
-        println!("Title: {} | Complete: {} ", 
+        println!("Title: {} | Complete: {} | No. of Issues: {} ", 
         proj.title, 
         proj.complete,
+        proj.issue_count,
     )
     }
 }
@@ -99,6 +133,8 @@ fn main() {
         "show_issues" => show_issues(&args[2..]),
         "new_proj" => new_project(&args[2..]),
         "show_projs" => show_projects(&args[2..]),
+        "issue_status" => issue_done(&args[2..]),
+        "proj_status" => proj_done(&args[2..]),
         // "mark_done" => mark_done(&args[2..]),
         // "delete" => delete(&args[2..]),
         _ => help(),
