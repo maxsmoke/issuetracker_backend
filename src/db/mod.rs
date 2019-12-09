@@ -36,6 +36,7 @@ pub fn create_issue<'a>(conn: &SqliteConnection, title: &'a str, proj: i32) {
 pub fn close_item(conn: &SqliteConnection, id: &i32, type_change: i8) -> QueryResult<usize> {
     let issue_target;
     let proj_target;
+    
     if type_change == 1 { // issues
 
         issue_target = all_issues.find(id).get_result::<models::Issue>(conn).unwrap();
@@ -80,14 +81,17 @@ pub fn create_project<'a>(conn: &SqliteConnection, title: &'a str){
         .expect("Error creating new project");
 }
 pub fn query_projects(conn: &SqliteConnection) -> Vec<models::Project>{
-    count_issues_in_projects(conn, 1);
     let projects = schema::project::table
     .load::<models::Project>(conn)
     .expect("Error loading Projects");
 
     //update issue count
     for project in projects{
-        let new_count = count_issues_in_projects(conn, project.id);
+
+        let new_count = all_issues.filter(project_id.eq(project.id))
+        .count()
+        .get_result::<i64>(conn)
+        .unwrap() as i32;
 
         if project.issue_count != new_count{
             let update_project = diesel::update(all_projects.find(project.id));
@@ -107,13 +111,7 @@ pub fn query_projects(conn: &SqliteConnection) -> Vec<models::Project>{
     .expect("Error loading Projects")
 }
 
-//used to update how many projects
-fn count_issues_in_projects(conn: &SqliteConnection, id: i32) -> i32 {
-    /* let result =  */all_issues.filter(project_id.eq(id))
-        .count()
-        .get_result::<i64>(conn)
-        .unwrap() as i32
-}
+
 /* fn update_project(conn: &SqliteConnection){
 
 } */
