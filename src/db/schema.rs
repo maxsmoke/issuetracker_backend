@@ -19,7 +19,4 @@ table! {
 
 joinable!(issue -> project (project_id));
 
-allow_tables_to_appear_in_same_query!(
-    issue,
-    project,
-);
+allow_tables_to_appear_in_same_query!(issue, project,);
