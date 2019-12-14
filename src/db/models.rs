@@ -5,7 +5,7 @@ use crate::db::schema::issue::dsl::{
     complete as new_complete_issue, issue as all_issues, project_id,
 };
 use crate::db::schema::project::dsl::{
-    complete as new_complete_proj, issue_count, project as all_projects,
+    complete as new_complete_proj, issue_count, project as all_projects, id as proj_ids
 };
 use crate::diesel::RunQueryDsl;
 // use diesel::SqliteConnection;
@@ -72,6 +72,7 @@ impl NewProject<'_>{
 }
 
 #[derive(Queryable, Serialize)]
+#[derive(Debug)]
 pub struct Project {
     pub id: i32,
     pub title: String,
@@ -106,5 +107,10 @@ impl Project{
         project::table
             .load::<Project>(conn)
             .expect("Error loading Projects")
+    }
+    pub fn query_projects(conn: &SqliteConnection, id: i32) ->  Project {
+       let result = project::table.find(id).first::<Project>(conn).expect("error");
+        println!("result {:?}", result);    
+        result
     }
 }

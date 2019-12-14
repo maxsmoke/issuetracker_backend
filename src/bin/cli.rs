@@ -108,6 +108,16 @@ fn show_projects(args: &[String]) {
     }
 }
 
+fn find_proj(args: &[String]){
+    if args.len() < 1{
+        println!("find_proj: missing <id>");
+        help();
+        return;
+    }
+    let conn = establish_connection();
+    models::Project::query_projects(&conn, 1);
+}
+
 fn main() {
     // cargo run --bin cli <command> <args>
     //  -3   -2   -1    0      1       2...
@@ -126,6 +136,7 @@ fn main() {
         "show_projs" => show_projects(&args[2..]),
         "issue_status" => issue_done(&args[2..]),
         "proj_status" => proj_done(&args[2..]),
+        "find_proj" => find_proj(&args[2..]),
         // "mark_done" => mark_done(&args[2..]),
         // "delete" => delete(&args[2..]),
         _ => help(),
