@@ -1,7 +1,6 @@
 use issuetracker::db::models;
 use issuetracker::db::{
-    close_item, /* create_issue,  create_project, */establish_connection, query_issues,
-    query_projects,
+    close_item, establish_connection, 
 };
 use std::env;
 
@@ -56,7 +55,7 @@ fn show_issues(args: &[String]) {
     let conn = establish_connection();
     println!("Issues\n---");
 
-    for issue in query_issues(&conn) {
+    for issue in models::Issue::show_issues(&conn) {
         println!(
             "Issue ID: {} | Title: {} | Content: {} | Complete: {} | Project_ID: {}",
             issue.id, issue.title, issue.content, issue.complete, issue.project_id
@@ -76,7 +75,6 @@ fn issue_done(args: &[String]) {
         Ok(n) => close_item(&conn, &n, 1),
         Err(e) => panic!("id: not a number {}", e),
     };
-    // close_item(conn, &args[1], 1);
 }
 fn proj_done(args: &[String]) {
     if args.len() > 1 {
@@ -91,10 +89,8 @@ fn proj_done(args: &[String]) {
         Ok(n) => close_item(&conn, &n, 0),
         Err(e) => panic!("id: not a number {}", e),
     };
-    // close_item(conn, &args[1], 1);
 }
 
-//TODO: Add number of open issues in project
 fn show_projects(args: &[String]) {
     if args.len() > 0 {
         println!("show_proj: unexpected argument.");
@@ -104,7 +100,7 @@ fn show_projects(args: &[String]) {
     let conn = establish_connection();
     println!("Projects\n---");
 
-    for proj in query_projects(&conn) {
+    for proj in models::Project::show_projects(&conn){
         println!(
             "Title: {} | Complete: {} | No. of Issues: {} ",
             proj.title, proj.complete, proj.issue_count,

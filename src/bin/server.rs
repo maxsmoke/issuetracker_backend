@@ -8,7 +8,7 @@ extern crate rocket;
 
 extern crate rocket_contrib;
 
-use issuetracker::db::{establish_connection, query_projects, query_issues};
+use issuetracker::db::{establish_connection, models/* query_projects, query_issues */};
 use rocket_contrib::json::Json;
 use issuetracker::json::{
     JsonIssueResponse,
@@ -25,7 +25,7 @@ fn get_projects() -> Json<JsonProjectResponse>{
     let mut response = JsonProjectResponse{ data: vec![]};
 
     let conn = establish_connection();
-    for project in query_projects(&conn) {
+    for project in models::Project::show_projects(&conn) {
         response.data.push(project);
     }
     Json(response)
@@ -36,7 +36,7 @@ fn get_issues() -> Json<JsonIssueResponse>{
     let mut response = JsonIssueResponse{ data: vec![]};
 
     let conn = establish_connection();
-    for issue in query_issues(&conn) {
+    for issue in models::Issue::show_issues(&conn) {
         response.data.push(issue);
     }
     Json(response)

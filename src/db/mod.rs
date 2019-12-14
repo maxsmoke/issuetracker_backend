@@ -2,11 +2,11 @@ use diesel;
 use diesel::{prelude::*, sqlite::SqliteConnection};
 
 use crate::db::schema::issue::dsl::{
-    complete as new_complete_issue, issue as all_issues, project_id,
+    complete as new_complete_issue, issue as all_issues,
 };
 
 use crate::db::schema::project::dsl::{
-    complete as new_complete_proj, issue_count, project as all_projects,
+    complete as new_complete_proj, project as all_projects,
 };
 
 pub mod models;
@@ -54,41 +54,6 @@ pub fn close_item(conn: &SqliteConnection, id: &i32, type_change: i8) -> QueryRe
             .set(new_complete_proj.eq(new_status))
             .execute(conn)
     }
-}
-pub fn query_issues(conn: &SqliteConnection) -> Vec<models::Issue> {
-    schema::issue::table
-        .load::<models::Issue>(conn)
-        .expect("Error loading Issues")
-}
-
-pub fn query_projects(conn: &SqliteConnection) -> Vec<models::Project> {
-    let projects = schema::project::table
-        .load::<models::Project>(conn)
-        .expect("Error loading Projects");
-
-    //update issue count
-    for project in projects {
-        let new_count = all_issues
-            .filter(project_id.eq(project.id))
-            .count()
-            .get_result::<i64>(conn)
-            .unwrap() as i32;
-
-        if project.issue_count != new_count {
-            let update_project = diesel::update(all_projects.find(project.id));
-
-            let result = update_project.set(issue_count.eq(new_count)).execute(conn);
-
-            match result {
-                Ok(e) => println!("{}", e),
-                Err(_e) => panic!("update issue_count Failed"),
-            };
-        }
-    }
-
-    schema::project::table
-        .load::<models::Project>(conn)
-        .expect("Error loading Projects")
 }
 
 /* fn update_project(conn: &SqliteConnection){
