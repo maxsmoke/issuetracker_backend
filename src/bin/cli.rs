@@ -1,7 +1,6 @@
 use issuetracker::db::models;
 use issuetracker::db::{
-    close_item, /* create_issue, */ create_project, establish_connection, query_issues,
-    query_projects,
+    close_item, establish_connection, 
 };
 use std::env;
 
@@ -32,14 +31,8 @@ fn new_issue(args: &[String]) {
     };
 
     let conn = establish_connection();
-    // create_issue(&conn, &args[0], num);
-    let issue = models::NewIssue {
-        title: &args[0],
-        project_id: num,
-        complete: 0,
-        content: String::from(""),
-    };
-    issue.create_issue(&conn);
+
+    models::NewIssue::create_issue(&conn, &args[0], num);
 }
 
 fn new_project(args: &[String]) {
@@ -49,7 +42,8 @@ fn new_project(args: &[String]) {
         return;
     }
     let conn = establish_connection();
-    create_project(&conn, &args[0]);
+
+    models::NewProject::create_project(&conn, &args[0]);
 }
 
 fn show_issues(args: &[String]) {
@@ -61,7 +55,7 @@ fn show_issues(args: &[String]) {
     let conn = establish_connection();
     println!("Issues\n---");
 
-    for issue in query_issues(&conn) {
+    for issue in models::Issue::show_issues(&conn) {
         println!(
             "Issue ID: {} | Title: {} | Content: {} | Complete: {} | Project_ID: {}",
             issue.id, issue.title, issue.content, issue.complete, issue.project_id
@@ -81,7 +75,6 @@ fn issue_done(args: &[String]) {
         Ok(n) => close_item(&conn, &n, 1),
         Err(e) => panic!("id: not a number {}", e),
     };
-    // close_item(conn, &args[1], 1);
 }
 fn proj_done(args: &[String]) {
     if args.len() > 1 {
@@ -96,10 +89,8 @@ fn proj_done(args: &[String]) {
         Ok(n) => close_item(&conn, &n, 0),
         Err(e) => panic!("id: not a number {}", e),
     };
-    // close_item(conn, &args[1], 1);
 }
 
-//TODO: Add number of open issues in project
 fn show_projects(args: &[String]) {
     if args.len() > 0 {
         println!("show_proj: unexpected argument.");
@@ -109,12 +100,22 @@ fn show_projects(args: &[String]) {
     let conn = establish_connection();
     println!("Projects\n---");
 
-    for proj in query_projects(&conn) {
+    for proj in models::Project::show_projects(&conn){
         println!(
             "Title: {} | Complete: {} | No. of Issues: {} ",
             proj.title, proj.complete, proj.issue_count,
         )
     }
+}
+
+fn find_proj(args: &[String]){
+    if args.len() < 1{
+        println!("find_proj: missing <id>");
+        help();
+        return;
+    }
+    let conn = establish_connection();
+    models::Project::query_projects(&conn, 1);
 }
 
 fn main() {
@@ -135,6 +136,7 @@ fn main() {
         "show_projs" => show_projects(&args[2..]),
         "issue_status" => issue_done(&args[2..]),
         "proj_status" => proj_done(&args[2..]),
+        "find_proj" => find_proj(&args[2..]),
         // "mark_done" => mark_done(&args[2..]),
         // "delete" => delete(&args[2..]),
         _ => help(),

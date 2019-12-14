@@ -8,7 +8,8 @@ extern crate rocket;
 
 extern crate rocket_contrib;
 
-use issuetracker::db::{establish_connection, query_projects, query_issues};
+use issuetracker::db::{establish_connection, models};
+use rocket::http::RawStr;
 use rocket_contrib::json::Json;
 use issuetracker::json::{
     JsonIssueResponse,
@@ -22,28 +23,45 @@ fn index() -> String {
 
 #[get("/projects")]
 fn get_projects() -> Json<JsonProjectResponse>{
-    let mut response = JsonProjectResponse{ data: vec![]};
+    let mut response = JsonProjectResponse{ data: vec![] };
 
     let conn = establish_connection();
-    for project in query_projects(&conn) {
+    for project in models::Project::show_projects(&conn) {
         response.data.push(project);
     }
     Json(response)
 }
 
-#[get("/issues")]
-fn get_issues() -> Json<JsonIssueResponse>{
-    let mut response = JsonIssueResponse{ data: vec![]};
+// #[get("/project/<id>")]
+#[get("/project?<id>")]
+fn query_projects(id: Option<&RawStr>) -> Json<JsonProjectResponse> {
+    let raw_str = id.unwrap();
+    let decode = raw_str.url_decode().unwrap();
+    let int_id = decode.parse::<i32>().unwrap();
+    
+    let mut response = JsonProjectResponse{ data: vec![] };
 
     let conn = establish_connection();
-    for issue in query_issues(&conn) {
+
+    let result = models::Project::query_projects(&conn, int_id);
+
+    response.data.push(result);
+    Json(response)
+}
+
+#[get("/issues")]
+fn get_issues() -> Json<JsonIssueResponse>{
+    let mut response = JsonIssueResponse{ data: vec![] };
+
+    let conn = establish_connection();
+    for issue in models::Issue::show_issues(&conn) {
         response.data.push(issue);
     }
     Json(response)
 }
 
 fn main() {
-    rocket::ignite().mount("/", routes![index, get_issues, get_projects]).launch();
+    rocket::ignite().mount("/", routes![index, get_issues, get_projects, query_projects]).launch();
 }
 
 
