@@ -1,6 +1,6 @@
 use issuetracker::db::models;
 use issuetracker::db::{
-    close_item, /* create_issue, */ create_project, establish_connection, query_issues,
+    close_item, /* create_issue,  create_project, */establish_connection, query_issues,
     query_projects,
 };
 use std::env;
@@ -32,14 +32,8 @@ fn new_issue(args: &[String]) {
     };
 
     let conn = establish_connection();
-    // create_issue(&conn, &args[0], num);
-    let issue = models::NewIssue {
-        title: &args[0],
-        project_id: num,
-        complete: 0,
-        content: String::from(""),
-    };
-    issue.create_issue(&conn);
+
+    models::NewIssue::create_issue(&conn, &args[0], num);
 }
 
 fn new_project(args: &[String]) {
@@ -49,7 +43,8 @@ fn new_project(args: &[String]) {
         return;
     }
     let conn = establish_connection();
-    create_project(&conn, &args[0]);
+
+    models::NewProject::create_project(&conn, &args[0]);
 }
 
 fn show_issues(args: &[String]) {

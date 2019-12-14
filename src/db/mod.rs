@@ -17,25 +17,12 @@ pub fn establish_connection() -> SqliteConnection {
     SqliteConnection::establish(db).unwrap_or_else(|_| panic!("Error connecting to {}", db))
 }
 
-/* pub fn create_issue<'a>(conn: &SqliteConnection, title: &'a str, proj: i32) {
-    let issue = models::NewIssue {
-        title: title,
-        project_id: proj,
-        complete: 0,
-        content: String::from(""),
-    };
-    diesel::insert_into(schema::issue::table)
-        .values(&issue)
-        .execute(conn)
-        .expect("Error inserting new issue");
-} */
 pub fn close_item(conn: &SqliteConnection, id: &i32, type_change: i8) -> QueryResult<usize> {
     let issue_target;
     let proj_target;
 
     if type_change == 1 {
         // issues
-
         issue_target = all_issues
             .find(id)
             .get_result::<models::Issue>(conn)
@@ -52,7 +39,6 @@ pub fn close_item(conn: &SqliteConnection, id: &i32, type_change: i8) -> QueryRe
             .execute(conn)
     } else {
         // projects
-
         proj_target = all_projects
             .find(id)
             .get_result::<models::Project>(conn)
@@ -75,17 +61,6 @@ pub fn query_issues(conn: &SqliteConnection) -> Vec<models::Issue> {
         .expect("Error loading Issues")
 }
 
-pub fn create_project<'a>(conn: &SqliteConnection, title: &'a str) {
-    let project = models::NewProject {
-        title: title,
-        complete: 0,
-        issue_count: 0,
-    };
-    diesel::insert_into(schema::project::table)
-        .values(&project)
-        .execute(conn)
-        .expect("Error creating new project");
-}
 pub fn query_projects(conn: &SqliteConnection) -> Vec<models::Project> {
     let projects = schema::project::table
         .load::<models::Project>(conn)
