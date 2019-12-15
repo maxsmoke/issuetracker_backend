@@ -8,12 +8,14 @@ extern crate rocket;
 extern crate rocket_contrib;
 
 use issuetracker::db::{establish_connection, models};
-use rocket::http::RawStr;
-use rocket_contrib::json::Json;
 use issuetracker::json::{
     JsonIssueResponse,
     JsonProjectResponse,
 };
+// use issuetracker::routes;
+
+use rocket::http::RawStr;
+use rocket_contrib::json::Json;
 
 #[get("/")]
 fn index() -> String {

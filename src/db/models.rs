@@ -2,13 +2,12 @@ use super::schema::{issue, project};
 use diesel;
 use diesel::{prelude::*, sqlite::SqliteConnection};
 use crate::db::schema::issue::dsl::{
-    complete as new_complete_issue, issue as all_issues, project_id,
+    /* complete as new_complete_issue, */ issue as all_issues, project_id,
 };
 use crate::db::schema::project::dsl::{
-    complete as new_complete_proj, issue_count, project as all_projects, id as proj_ids
+    /* complete as new_complete_proj,  */issue_count, project as all_projects, /* id as proj_ids */
 };
 use crate::diesel::RunQueryDsl;
-// use diesel::SqliteConnection;
 
 #[derive(Insertable)]
 #[table_name = "issue"]
@@ -108,9 +107,8 @@ impl Project{
             .load::<Project>(conn)
             .expect("Error loading Projects")
     }
+
     pub fn query_projects(conn: &SqliteConnection, id: i32) ->  Project {
-       let result = project::table.find(id).first::<Project>(conn).expect("error");
-        println!("result {:?}", result);    
-        result
+        project::table.find(id).first::<Project>(conn).expect("Error: Failed Project query")
     }
 }
