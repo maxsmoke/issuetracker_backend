@@ -1,4 +1,7 @@
-use super::db::models;
+pub mod project_routes;
+pub mod issue_routes;
 
-pub mod projectRoutes;
-pub mod issueRoutes;
+#[get("/")]
+pub fn index() -> String {
+    String::from("Hello World")
+} 
