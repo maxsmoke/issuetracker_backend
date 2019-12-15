@@ -46,6 +46,9 @@ impl Issue {
             .load::<Issue>(conn)
             .expect("Error loading Issues")
     }
+    pub fn query_issues(conn: &SqliteConnection, id: i32) ->  Issue {
+        issue::table.find(id).first::<Issue>(conn).expect("Error: Failed Project query")
+    }
 }
 
 

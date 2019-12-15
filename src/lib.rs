@@ -18,6 +18,7 @@ pub fn rocket() -> rocket::Rocket{
         routes::project_routes::get_projects,
         routes::project_routes::query_projects,
         routes::issue_routes::get_issues,
+        routes::issue_routes::query_issue,
         routes::index,
     ])
 }
