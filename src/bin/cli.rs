@@ -32,7 +32,7 @@ fn new_issue(args: &[String]) {
 
     let conn = establish_connection();
 
-    models::NewIssue::create_issue(&conn, &args[0], num);
+    models::NewIssue::insert(&conn, &args[0], num);
 }
 
 fn new_project(args: &[String]) {
@@ -43,7 +43,7 @@ fn new_project(args: &[String]) {
     }
     let conn = establish_connection();
 
-    models::NewProject::create_project(&conn, &args[0]);
+    models::NewProject::new(&conn, &args[0]);
 }
 
 fn show_issues(args: &[String]) {
@@ -55,7 +55,7 @@ fn show_issues(args: &[String]) {
     let conn = establish_connection();
     println!("Issues\n---");
 
-    for issue in models::Issue::show_issues(&conn) {
+    for issue in models::Issue::all(&conn) {
         println!(
             "Issue ID: {} | Title: {} | Content: {} | Complete: {} | Project_ID: {}",
             issue.id, issue.title, issue.content, issue.complete, issue.project_id
@@ -100,7 +100,7 @@ fn show_projects(args: &[String]) {
     let conn = establish_connection();
     println!("Projects\n---");
 
-    for proj in models::Project::show_projects(&conn){
+    for proj in models::Project::all(&conn){
         println!(
             "Title: {} | Complete: {} | No. of Issues: {} ",
             proj.title, proj.complete, proj.issue_count,
@@ -115,7 +115,7 @@ fn find_proj(args: &[String]){
         return;
     }
     let conn = establish_connection();
-    models::Project::query_projects(&conn, 1);
+    models::Project::get(&conn, 1);
 }
 
 fn main() {

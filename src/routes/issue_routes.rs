@@ -8,12 +8,13 @@ pub fn get_issues() -> Json<JsonIssueResponse>{
     let mut response = JsonIssueResponse{ data: vec![] };
 
     let conn = establish_connection();
-    for issue in models::Issue::show_issues(&conn) {
+    for issue in models::Issue::all(&conn) {
         response.data.push(issue);
     }
     Json(response)
 }
 
+// #[get("/issue/<id>")]
 #[get("/issue?<id>")]
 pub fn query_issue(id: Option<&RawStr>) -> Json<JsonIssueResponse> {
     let conn = establish_connection();
@@ -30,6 +31,9 @@ pub fn query_issue(id: Option<&RawStr>) -> Json<JsonIssueResponse> {
             Ok(e) => e,
             Err(_e) => 0,
         };
-    let result = models::Issue::query_issues(&conn, int_id);
+    let result = models::Issue::get(int_id, &conn);
     Json( JsonIssueResponse{ data: vec![result]})
 }
+/* #[post("")]
+#[put("")]
+#[delete("")] */
