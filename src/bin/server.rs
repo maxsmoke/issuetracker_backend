@@ -1,8 +1,8 @@
-
 use issuetracker;
 
 fn main() {
-    issuetracker::rocket().launch();
+    issuetracker::rocket()
+    .launch();
 }
 
 

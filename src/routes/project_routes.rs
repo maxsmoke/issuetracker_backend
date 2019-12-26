@@ -1,7 +1,12 @@
 use crate ::json::JsonProjectResponse;
 use crate ::db::{ establish_connection, models };
+use models::{
+    NewProject
+};
 use diesel::SqliteConnection;
-use rocket::http::RawStr;
+use diesel::result::Error;
+use rocket::http::{ RawStr, Status};
+use rocket::response::{/* Failure, */ status};
 use rocket_contrib::json::Json;
 
 
@@ -13,8 +18,9 @@ pub fn get_projects() -> Json<JsonProjectResponse>{
     for project in models::Project::all(&conn) {
         response.data.push(project);
     }
-    Json(response)
+    Json(response) 
 }
+
 
 // #[get("/project/<id>")]
 #[get("/project?<id>")]
@@ -40,11 +46,13 @@ pub fn query_projects(id: Option<&RawStr>) -> Json<JsonProjectResponse> {
     Json( JsonProjectResponse{ data: vec![result]})
 }
 
-/* #[post("/project/new/", format="application/json", data="<project>")]
-pub fn create_project(title: Json<Project>, conn: SqliteConnection) {
-    
-   
+#[post("/project/new", format="application/json", data="<project>")]
+pub fn new_project(project: Json<NewProject>){
+    //must contain all values in New Project
+    let conn = establish_connection();
+    NewProject::insert(project.into_inner(), &conn)
 }
 
+/*
 #[put("")]
 #[delete("")] */

@@ -1,13 +1,21 @@
 use super::schema::{issue, project};
 use diesel;
-use diesel::{prelude::*, sqlite::SqliteConnection};
+use diesel::{prelude::*, sqlite::SqliteConnection, RunQueryDsl};
 use crate::db::schema::issue::dsl::{
     issue as all_issues, project_id,
 };
 use crate::db::schema::project::dsl::{
     issue_count, project as all_projects,
 };
-use crate::diesel::RunQueryDsl;
+// use crate::rocket::data;
+use std::io::Read;
+use rocket::{Request, Data, Outcome, Outcome::*};
+use rocket::data::{self, FromDataSimple};
+use rocket::http::{Status, ContentType};
+// Always use a limit to prevent DoS attacks.
+const LIMIT: u64 = 256;
+
+use super::establish_connection;
 
 use super::schema::{ issue as issues, project as projects };
 
@@ -63,15 +71,21 @@ impl Issue {
 }
 
 
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize, Debug)]
 #[table_name = "project"]
-pub struct NewProject<'a> {
-    pub title: &'a str,
+pub struct NewProject {
+    pub title: String,
     pub complete: i32,
     pub issue_count: i32,
 }
-impl NewProject<'_>{
-    pub fn new(conn: &SqliteConnection, title: &String){
+impl NewProject{
+    pub fn insert(project: NewProject, conn: &SqliteConnection){
+        diesel::insert_into(project::table)
+            .values(project)
+            .execute(conn)
+            .expect("Error inserting new project");
+    }
+    pub fn new(title: String, conn: &SqliteConnection){
         diesel::insert_into(project::table)
             .values(
                 NewProject {

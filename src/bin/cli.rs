@@ -43,7 +43,8 @@ fn new_project(args: &[String]) {
     }
     let conn = establish_connection();
 
-    models::NewProject::new(&conn, &args[0]);
+    models::NewProject::new(args[0].clone(), &conn);
+    // models::NewProject::new(&conn, &args[0]);
 }
 
 fn show_issues(args: &[String]) {
