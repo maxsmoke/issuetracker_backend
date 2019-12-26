@@ -32,7 +32,7 @@ fn new_issue(args: &[String]) {
 
     let conn = establish_connection();
 
-    models::NewIssue::insert(&conn, &args[0], num);
+    // models::NewIssue::insert(&conn, &args[0], num);
 }
 
 fn new_project(args: &[String]) {
@@ -43,7 +43,7 @@ fn new_project(args: &[String]) {
     }
     let conn = establish_connection();
 
-    models::NewProject::new(args[0].clone(), &conn);
+    // models::NewProject::new(args[0].clone(), &conn);
     // models::NewProject::new(&conn, &args[0]);
 }
 

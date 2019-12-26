@@ -21,28 +21,22 @@ use super::schema::{ issue as issues, project as projects };
 
 #[derive(Insertable, Deserialize)]
 #[table_name = "issue"]
-pub struct NewIssue<'a> {
-    pub title: &'a str,
+pub struct NewIssue {
+    pub title: String,
     pub project_id: i32,
     pub complete: i32,
     pub content: String,
 }
-impl NewIssue<'_> {
-    pub fn insert<'a>(conn: &SqliteConnection, title: &String, id: i32) {
+impl NewIssue{
+    pub fn insert(issue: NewIssue, conn: &SqliteConnection) {
         diesel::insert_into(issue::table)
-            .values(
-                NewIssue{
-                    title,
-                    project_id: id,
-                    complete: 0, 
-                    content: String::from("")
-                })
+            .values(issue)
             .execute(conn)
             .expect("Error inserting new issue");
     }
 }
 
-#[derive(AsChangeset, Queryable, Serialize)]
+#[derive(AsChangeset, Queryable, Deserialize, Serialize)]
 #[table_name="issues"]
 pub struct Issue {
     pub id: i32,
@@ -82,17 +76,6 @@ impl NewProject{
     pub fn insert(project: NewProject, conn: &SqliteConnection){
         diesel::insert_into(project::table)
             .values(project)
-            .execute(conn)
-            .expect("Error inserting new project");
-    }
-    pub fn new(title: String, conn: &SqliteConnection){
-        diesel::insert_into(project::table)
-            .values(
-                NewProject {
-                title,
-                complete: 0,
-                issue_count: 0,
-            })
             .execute(conn)
             .expect("Error inserting new project");
     }
