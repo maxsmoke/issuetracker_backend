@@ -1,6 +1,7 @@
 use crate ::json::JsonProjectResponse;
 use crate ::db::{ establish_connection, models };
 use models::{
+    Project,
     NewProject
 };
 use diesel::SqliteConnection;
@@ -21,8 +22,6 @@ pub fn get_projects() -> Json<JsonProjectResponse>{
     Json(response) 
 }
 
-
-// #[get("/project/<id>")]
 #[get("/project?<id>")]
 pub fn query_projects(id: Option<&RawStr>) -> Json<JsonProjectResponse> {
 
@@ -53,6 +52,11 @@ pub fn new_project(project: Json<NewProject>){
     NewProject::insert(project.into_inner(), &conn)
 }
 
+
+#[put("/project/update/<id>", format="application/json", data="<project>")]
+pub fn update_project(id: i32, project: Json<Project>){
+    let conn = establish_connection();
+    Project::update(id, project.into_inner(), &conn);
+}
 /*
-#[put("")]
 #[delete("")] */

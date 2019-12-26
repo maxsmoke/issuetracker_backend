@@ -8,18 +8,18 @@ use crate::db::schema::project::dsl::{
     issue_count, project as all_projects,
 };
 // use crate::rocket::data;
-use std::io::Read;
-use rocket::{Request, Data, Outcome, Outcome::*};
-use rocket::data::{self, FromDataSimple};
-use rocket::http::{Status, ContentType};
+// use std::io::Read;
+// use rocket::{Request, Data, Outcome, Outcome::*};
+// use rocket::data::{self, FromDataSimple};
+// use rocket::http::{Status, ContentType};
 // Always use a limit to prevent DoS attacks.
-const LIMIT: u64 = 256;
+// const LIMIT: u64 = 256;
 
-use super::establish_connection;
+// use super::establish_connection;
 
 use super::schema::{ issue as issues, project as projects };
 
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize)]
 #[table_name = "issue"]
 pub struct NewIssue<'a> {
     pub title: &'a str,
@@ -71,7 +71,7 @@ impl Issue {
 }
 
 
-#[derive(Insertable, Deserialize, Debug)]
+#[derive(Insertable, Deserialize)]
 #[table_name = "project"]
 pub struct NewProject {
     pub title: String,
@@ -98,7 +98,7 @@ impl NewProject{
     }
 }
 
-#[derive(Debug, Queryable, Serialize, AsChangeset)]
+#[derive(Queryable, Deserialize, Serialize, AsChangeset)]
 #[table_name="projects"]
 pub struct Project {
     pub id: i32,
@@ -139,12 +139,18 @@ impl Project{
     pub fn get(conn: &SqliteConnection, id: i32) ->  Project {
         project::table.find(id).get_result::<Project>(conn).expect("Error: Failed Project query")
     }
-    pub fn update(id: i32, project: Project, conn: &SqliteConnection){
-        diesel::update(projects::table.find(id))
+    pub fn update(id: i32, project: Project, conn: &SqliteConnection) -> &str{
+        match diesel::update(projects::table.find(id))
         .set(&project)
-        .execute(conn);
+        .execute(conn){
+            Ok(_e) => "Updated",
+            Err(_e) => "Failed to Update",
+        }
     }
-    pub fn delete(id: i32, conn: &SqliteConnection){
-        diesel::delete(projects::table.find(id)).execute(conn);
+    pub fn delete(id: i32, conn: &SqliteConnection) -> &str{
+        match diesel::delete(projects::table.find(id)).execute(conn){
+            Ok(_e) => "Delete Successful",
+            Err(_e) => "Delete Failed",
+        }
     }
 }

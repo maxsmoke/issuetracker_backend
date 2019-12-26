@@ -25,9 +25,10 @@ pub fn rocket() -> rocket::Rocket{
     .mount("/", routes![
         routes::project_routes::get_projects,
         routes::project_routes::new_project,
+        routes::project_routes::update_project,
         routes::project_routes::query_projects,
         routes::issue_routes::get_issues,
-        routes::issue_routes::query_issue,
+        routes::issue_routes::query_issues,
         routes::index,
     ])
 }

@@ -16,7 +16,7 @@ pub fn get_issues() -> Json<JsonIssueResponse>{
 
 // #[get("/issue/<id>")]
 #[get("/issue?<id>")]
-pub fn query_issue(id: Option<&RawStr>) -> Json<JsonIssueResponse> {
+pub fn query_issues(id: Option<&RawStr>) -> Json<JsonIssueResponse> {
     let conn = establish_connection();
 
     let raw_str = match id {
