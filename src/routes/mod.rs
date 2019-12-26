@@ -1,5 +1,5 @@
-pub mod project_routes;
-pub mod issue_routes;
+pub mod projects;
+pub mod issues;
 
 #[get("/")]
 pub fn index() -> String {

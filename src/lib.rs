@@ -23,13 +23,15 @@ pub fn rocket() -> rocket::Rocket{
     rocket::ignite()
     // .attach(LogsDbConn::fairing())
     .mount("/", routes![
-        routes::project_routes::get_projects,
-        routes::project_routes::new_project,
-        routes::project_routes::update_project,
-        routes::project_routes::query_projects,
-        routes::project_routes::delete_project,
-        routes::issue_routes::get_issues,
-        routes::issue_routes::query_issues,
+        routes::projects::delete,
+        routes::projects::get,
+        routes::projects::get_project,
+        routes::projects::new,
+        routes::projects::update,
+        routes::issues::get,
+        routes::issues::get_issue,
+        routes::issues::new,
+        routes::issues::update,
         routes::index,
     ])
 }
