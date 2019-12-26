@@ -1,39 +1,43 @@
 use super::schema::{issue, project};
 use diesel;
-use diesel::{prelude::*, sqlite::SqliteConnection};
+use diesel::{prelude::*, sqlite::SqliteConnection, RunQueryDsl};
 use crate::db::schema::issue::dsl::{
-    complete as new_complete_issue, issue as all_issues, project_id,
+    issue as all_issues, project_id,
 };
 use crate::db::schema::project::dsl::{
-    complete as new_complete_proj, issue_count, project as all_projects, id as proj_ids
+    issue_count, project as all_projects,
 };
-use crate::diesel::RunQueryDsl;
-// use diesel::SqliteConnection;
+// use crate::rocket::data;
+// use std::io::Read;
+// use rocket::{Request, Data, Outcome, Outcome::*};
+// use rocket::data::{self, FromDataSimple};
+// use rocket::http::{Status, ContentType};
+// Always use a limit to prevent DoS attacks.
+// const LIMIT: u64 = 256;
 
-#[derive(Insertable)]
+// use super::establish_connection;
+
+use super::schema::{ issue as issues, project as projects };
+
+#[derive(Insertable, Deserialize)]
 #[table_name = "issue"]
-pub struct NewIssue<'a> {
-    pub title: &'a str,
+pub struct NewIssue {
+    pub title: String,
     pub project_id: i32,
     pub complete: i32,
     pub content: String,
 }
-impl NewIssue<'_> {
-    pub fn create_issue<'a>(conn: &SqliteConnection, title: &String, id: i32) {
+impl NewIssue{
+    pub fn insert(issue: NewIssue, conn: &SqliteConnection) {
         diesel::insert_into(issue::table)
-            .values(
-                NewIssue{
-                    title,
-                    project_id: id,
-                    complete: 0, 
-                    content: String::from("")
-                })
+            .values(issue)
             .execute(conn)
             .expect("Error inserting new issue");
     }
 }
 
-#[derive(Queryable, Serialize)]
+#[derive(AsChangeset, Queryable, Deserialize, Serialize)]
+#[table_name="issues"]
 pub struct Issue {
     pub id: i32,
     pub title: String,
@@ -42,37 +46,43 @@ pub struct Issue {
     pub content: String,
 }
 impl Issue { 
-    pub fn show_issues(conn: &SqliteConnection) -> Vec<Issue>{
+    pub fn all(conn: &SqliteConnection) -> Vec<Issue>{
         issue::table
             .load::<Issue>(conn)
             .expect("Error loading Issues")
     }
+    pub fn get(id: i32, conn: &SqliteConnection) ->  Issue {
+        issue::table.find(id).get_result::<Issue>(conn).expect("Error: Failed Project query")
+    }
+    pub fn update(id: i32, issue: Issue, conn: &SqliteConnection){
+        diesel::update(issues::table.find(id))
+        .set(&issue)
+        .execute(conn);
+    }
+    pub fn delete(id: i32, conn: &SqliteConnection){
+        diesel::delete(issues::table.find(id)).execute(conn);
+    }
 }
 
 
-#[derive(Insertable)]
+#[derive(Insertable, Deserialize)]
 #[table_name = "project"]
-pub struct NewProject<'a> {
-    pub title: &'a str,
+pub struct NewProject {
+    pub title: String,
     pub complete: i32,
     pub issue_count: i32,
 }
-impl NewProject<'_>{
-    pub fn create_project(conn: &SqliteConnection, title: &String){
+impl NewProject{
+    pub fn insert(project: NewProject, conn: &SqliteConnection){
         diesel::insert_into(project::table)
-            .values(
-                NewProject {
-                title,
-                complete: 0,
-                issue_count: 0,
-            })
+            .values(project)
             .execute(conn)
             .expect("Error inserting new project");
     }
 }
 
-#[derive(Queryable, Serialize)]
-#[derive(Debug)]
+#[derive(Queryable, Deserialize, Serialize, AsChangeset)]
+#[table_name="projects"]
 pub struct Project {
     pub id: i32,
     pub title: String,
@@ -80,7 +90,7 @@ pub struct Project {
     pub issue_count: i32,
 }
 impl Project{
-    pub fn show_projects(conn: &SqliteConnection) -> Vec<Project>{
+    pub fn all(conn: &SqliteConnection) -> Vec<Project>{
         let projects = project::table
         .load::<Project>(conn)
         .expect("Error loading Projects");
@@ -108,9 +118,22 @@ impl Project{
             .load::<Project>(conn)
             .expect("Error loading Projects")
     }
-    pub fn query_projects(conn: &SqliteConnection, id: i32) ->  Project {
-       let result = project::table.find(id).first::<Project>(conn).expect("error");
-        println!("result {:?}", result);    
-        result
+
+    pub fn get(conn: &SqliteConnection, id: i32) ->  Project {
+        project::table.find(id).get_result::<Project>(conn).expect("Error: Failed Project query")
+    }
+    pub fn update(id: i32, project: Project, conn: &SqliteConnection) -> &str{
+        match diesel::update(projects::table.find(id))
+        .set(&project)
+        .execute(conn){
+            Ok(_e) => "Updated",
+            Err(_e) => "Failed to Update",
+        }
+    }
+    pub fn delete(id: i32, conn: &SqliteConnection) -> &str{
+        match diesel::delete(projects::table.find(id)).execute(conn){
+            Ok(_e) => "Delete Successful",
+            Err(_e) => "Delete Failed",
+        }
     }
 }
