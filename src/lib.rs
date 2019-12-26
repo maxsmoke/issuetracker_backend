@@ -27,6 +27,7 @@ pub fn rocket() -> rocket::Rocket{
         routes::project_routes::new_project,
         routes::project_routes::update_project,
         routes::project_routes::query_projects,
+        routes::project_routes::delete_project,
         routes::issue_routes::get_issues,
         routes::issue_routes::query_issues,
         routes::index,

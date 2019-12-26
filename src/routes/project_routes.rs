@@ -58,5 +58,9 @@ pub fn update_project(id: i32, project: Json<Project>){
     let conn = establish_connection();
     Project::update(id, project.into_inner(), &conn);
 }
-/*
-#[delete("")] */
+
+#[delete("/project/delete/<id>")]
+pub fn delete_project(id: i32){
+    let conn = establish_connection();
+    Project::delete(id, &conn);
+}
