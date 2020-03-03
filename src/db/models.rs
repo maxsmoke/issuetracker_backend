@@ -7,28 +7,21 @@ use crate::db::schema::issue::dsl::{
 use crate::db::schema::project::dsl::{
     issue_count, project as all_projects,
 };
-// use crate::rocket::data;
-// use std::io::Read;
-// use rocket::{Request, Data, Outcome, Outcome::*};
-// use rocket::data::{self, FromDataSimple};
-// use rocket::http::{Status, ContentType};
-// Always use a limit to prevent DoS attacks.
-// const LIMIT: u64 = 256;
+use rocket::http::Status;
 
-// use super::establish_connection;
 
 use super::schema::{ issue as issues, project as projects };
 
 #[derive(Insertable, Deserialize)]
 #[table_name = "issue"]
-pub struct NewIssue {
+pub struct InsertableIssue {
     pub title: String,
     pub project_id: i32,
     pub complete: i32,
     pub content: String,
 }
-impl NewIssue{
-    pub fn insert(issue: NewIssue, conn: &SqliteConnection) {
+impl InsertableIssue{
+    pub fn insert(issue: InsertableIssue, conn: &SqliteConnection) {
         diesel::insert_into(issue::table)
             .values(issue)
             .execute(conn)
@@ -54,13 +47,19 @@ impl Issue {
     pub fn get(id: i32, conn: &SqliteConnection) ->  Issue {
         issue::table.find(id).get_result::<Issue>(conn).expect("Error: Failed Project query")
     }
-    pub fn update(id: i32, issue: Issue, conn: &SqliteConnection){
-        diesel::update(issues::table.find(id))
+    pub fn update(id: i32, issue: Issue, conn: &SqliteConnection) -> Status{
+        match diesel::update(issues::table.find(id))
         .set(&issue)
-        .execute(conn);
+        .execute(conn){
+            Ok(_e) => Status::Ok,
+            Err(_e) => Status::InternalServerError,
+        }
     }
-    pub fn delete(id: i32, conn: &SqliteConnection){
-        diesel::delete(issues::table.find(id)).execute(conn);
+    pub fn delete(id: i32, conn: &SqliteConnection) -> Status{
+        match diesel::delete(issues::table.find(id)).execute(conn){
+            Ok(_e) => Status::Ok,
+            Err(_e) => Status::NotFound,
+        }
     }
 }
 
@@ -81,7 +80,7 @@ impl NewProject{
     }
 }
 
-#[derive(Queryable, Deserialize, Serialize, AsChangeset)]
+#[derive(AsChangeset, Debug, Deserialize, Serialize, Queryable)]
 #[table_name="projects"]
 pub struct Project {
     pub id: i32,
@@ -95,6 +94,7 @@ impl Project{
         .load::<Project>(conn)
         .expect("Error loading Projects");
 
+        print!("in all projects");
     //update issue count
     for project in projects {
         let new_count = all_issues
@@ -119,21 +119,22 @@ impl Project{
             .expect("Error loading Projects")
     }
 
-    pub fn get(conn: &SqliteConnection, id: i32) ->  Project {
+    pub fn get(conn: &SqliteConnection, id: i32) -> Project {
         project::table.find(id).get_result::<Project>(conn).expect("Error: Failed Project query")
     }
-    pub fn update(id: i32, project: Project, conn: &SqliteConnection) -> &str{
+    pub fn update(id: i32, project: Project, conn: &SqliteConnection) -> Status{
+        print!("{:?}", project);
         match diesel::update(projects::table.find(id))
         .set(&project)
         .execute(conn){
-            Ok(_e) => "Updated",
-            Err(_e) => "Failed to Update",
+            Ok(_e) => Status::Ok,
+            Err(_e) => Status::InternalServerError,
         }
     }
-    pub fn delete(id: i32, conn: &SqliteConnection) -> &str{
+    pub fn delete(id: i32, conn: &SqliteConnection) -> Status{
         match diesel::delete(projects::table.find(id)).execute(conn){
-            Ok(_e) => "Delete Successful",
-            Err(_e) => "Delete Failed",
+            Ok(_e) => Status::Ok,
+            Err(_e) => Status::NotFound,
         }
     }
 }

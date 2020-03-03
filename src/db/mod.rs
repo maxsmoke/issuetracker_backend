@@ -17,6 +17,7 @@ pub fn establish_connection() -> SqliteConnection {
     SqliteConnection::establish(db).unwrap_or_else(|_| panic!("Error connecting to {}", db))
 }
 
+//used for CLI
 pub fn close_item(conn: &SqliteConnection, id: &i32, type_change: i8) -> QueryResult<usize> {
     let issue_target;
     let proj_target;
